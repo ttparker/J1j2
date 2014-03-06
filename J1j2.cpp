@@ -37,35 +37,33 @@ MatrixXd Hamiltonian::blockAdjacentSiteJoin(int j,
                                             const std::vector<MatrixXd>& rhoBasisH2)
                                             const
 {
+    MatrixXd plusMinus = kp(rhoBasisSigmaplus, sigmaminus);
     return couplingConstants[j - 1] *
-        (kp(rhoBasisSigmaz, sigmaz)
-         + 2 * (kp(rhoBasisSigmaplus, sigmaminus)
-                + kp(rhoBasisSigmaplus.adjoint(), sigmaplus)));
+        (kp(rhoBasisSigmaz, sigmaz) + 2 * (plusMinus + plusMinus.adjoint()));
 };
 
 MatrixXd Hamiltonian::lBlockrSiteJoin(const std::vector<Eigen::MatrixXd>&
                                       off0RhoBasisH2, int mlE) const
 {
-    return j2 *
-        (kp(kp(off0RhoBasisSigmaz, Id(d * mlE)), sigmaz)
-         + 2 * (kp(kp(off0RhoBasisSigmaplus, Id(d * mlE)), sigmaminus)
-                + kp(kp(off0RhoBasisSigmaplus.adjoint(), Id(d * mlE)), sigmaplus)));
+    MatrixXd plusMinus = kp(kp(off0RhoBasisSigmaplus, Id(d * mlE)), sigmaminus);
+    return j2 * (kp(kp(off0RhoBasisSigmaz, Id(d * mlE)), sigmaz)
+                 + 2 * (plusMinus + plusMinus.adjoint()));
 };
 
 MatrixXd Hamiltonian::lSiterBlockJoin(int ml,
                                       const std::vector<Eigen::MatrixXd>&
                                       off0RhoBasisH2) const
 {
+    MatrixXd plusMinus = kp(sigmaplus, off0RhoBasisSigmaplus.adjoint());
     return j2 *
         kp(kp(Id(ml), kp(sigmaz, off0RhoBasisSigmaz)
-                      + 2 * (kp(sigmaplus, off0RhoBasisSigmaplus.adjoint())
-                             + kp(sigmaminus, off0RhoBasisSigmaplus))),
+                      + 2 * (plusMinus + plusMinus.adjoint())),
            Id_d);
 };
 
 MatrixXd Hamiltonian::siteSiteJoin(int ml, int mlE) const
 {
+    MatrixXd plusMinus = kp(kp(sigmaplus, Id(mlE)), sigmaminus);
     return j1 * kp(Id(ml), kp(kp(sigmaz, Id(mlE)), sigmaz)
-                           + 2 * (kp(kp(sigmaplus, Id(mlE)), sigmaminus)
-                                  + kp(kp(sigmaminus, Id(mlE)), sigmaplus)));
+                           + 2 * (plusMinus + plusMinus.adjoint()));
 };
