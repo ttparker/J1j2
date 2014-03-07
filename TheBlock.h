@@ -31,6 +31,8 @@ class TheBlock
 					// HSuperFinal, mSFinal, qNumList, oneSiteQNums, targetQNum
     
 	private:
+        std::vector<int> qNumList;
+                // tracks the conserved quantum number of each row/column of hS
 		Eigen::MatrixXd hS;								// block Hamiltonian
         std::vector<Eigen::MatrixXd> off0RhoBasisH2,
                                      off1RhoBasisH2;
@@ -39,12 +41,10 @@ class TheBlock
             // the site on which it acts
 		int m;								// number of states stored in block
 		static rmMatrixXd psiGround;
-        static bool firstfDMRGStep;         // slight abuse of nomenclature -
-                                            // true during iDMRG as well
-        std::vector<int> qNumList;			// tracks the conserved quantum
-											// number of each row/column of hS
 		static int mMax;				// max size of effective Hamiltonian
         Eigen::MatrixXd primeToRhoBasis;            // change-of-basis matrix
+        static bool firstfDMRGStep;
+                    // slight abuse of nomenclature - true during iDMRG as well
         
 		Eigen::MatrixXd changeBasis(const Eigen::MatrixXd& mat) const;
 				// represents operators in the basis of the new system block
