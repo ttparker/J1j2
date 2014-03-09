@@ -105,7 +105,7 @@ int main()
         std::cout << "Performing iDMRG..." << std::endl;
         for(int site = 0; site < skips; site++)                   // initial ED
             rightBlocks[site + 1] = leftBlocks[site + 1]
-                                  = leftBlocks[site].nextBlock(ham, site,
+                                  = leftBlocks[site].nextBlock(site,
                                                                rightBlocks[site]);
                                         // note: the third argument is not used
         Sector::setLancTolerance(groundStateErrorTolerance
@@ -113,7 +113,7 @@ int main()
         int lSFinal = lSys / 2 - 1;         // final length of the system block
         for(int site = skips, end = lSFinal - 1; site < end; site++)    //iDMRG
             rightBlocks[site + 1] = leftBlocks[site + 1]
-                                  = leftBlocks[site].nextBlock(ham, site,
+                                  = leftBlocks[site].nextBlock(site,
                                                                rightBlocks[site],
                                                                false);
         if(nSweeps == 0)
@@ -125,20 +125,20 @@ int main()
             {
                 for(int site = lSFinal - 1, end = lSys - 4 - skips; site < end;
                     site++)
-                    leftBlocks[site + 1] = leftBlocks[site].nextBlock(ham,
+                    leftBlocks[site + 1] = leftBlocks[site].nextBlock(
                                            site, rightBlocks[lSys - 4 - site],
                                            false, false,
                                            rightBlocks[lSys - 5 - site]);
                 rightBlocks[skips].reflectPredictedPsi();
                                // reflect the system to reverse sweep direction
                 for(int site = skips, end = lSys - 4 - skips; site < end; site++)
-                    rightBlocks[site + 1] = rightBlocks[site].nextBlock(ham,
+                    rightBlocks[site + 1] = rightBlocks[site].nextBlock(
                                             site, leftBlocks[lSys - 4 - site],
                                             false, false,
                                             leftBlocks[lSys - 5 - site]);
                 leftBlocks[skips].reflectPredictedPsi();
                 for(int site = skips, end = lSFinal - 1; site < end; site++)
-                    leftBlocks[site + 1] = leftBlocks[site].nextBlock(ham,
+                    leftBlocks[site + 1] = leftBlocks[site].nextBlock(
                                            site, rightBlocks[lSys - 4 - site],
                                            false, false,
                                            rightBlocks[lSys - 5 - site]);
@@ -146,7 +146,7 @@ int main()
             };
         };
         EffectiveHamiltonian hSuperFinal = leftBlocks[lSFinal - 1]
-                      .createHSuperFinal(ham, rightBlocks[lSFinal - 1], skips);
+                      .createHSuperFinal(rightBlocks[lSFinal - 1], skips);
                                                // calculate ground-state energy
         fileout << "Ground state energy density = "
                 << hSuperFinal.gsEnergy() / lSys << std::endl << std::endl;
