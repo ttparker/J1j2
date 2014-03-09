@@ -87,11 +87,11 @@ TheBlock TheBlock::nextBlock(int l, TheBlock& compBlock, bool exactDiag,
                                                          vectorProductSum(compBlock.qNumList,
                                                                           ham.oneSiteQNums)),
                                         ham.targetQNum, seed));
-    psiGround = hSuperSolver.lowestEvec;				// ground state
+    psiGround = hSuperSolver.lowestEvec();				// ground state
     psiGround.resize(md, infiniteStage ? md : compmd);
     DMSolver rhoSolver(psiGround * psiGround.adjoint(), hSprimeQNumList, mMax);
                                             // find density matrix eigenstates
-    primeToRhoBasis = rhoSolver.highestEvecs;	// construct change-of-basis matrix
+    primeToRhoBasis = rhoSolver.highestEvecs();	// construct change-of-basis matrix
     for(int i = 0; i < indepCouplingOperators; i++)
     {
         tempOff0RhoBasisH2.push_back(changeBasis(kp(Id(m), ham.h2[i])));
@@ -118,7 +118,7 @@ TheBlock TheBlock::nextBlock(int l, TheBlock& compBlock, bool exactDiag,
         psiGround.resize(mMax * d * beforeCompBlock.primeToRhoBasis.rows(), 1);
     };
     return TheBlock(mMax, changeBasis(hSprime), tempOff0RhoBasisH2,
-                    tempOff1RhoBasisH2, rhoSolver.highestEvecQNums);
+                    tempOff1RhoBasisH2, rhoSolver.highestEvecQNums());
                                 // save expanded-block operators in new basis
 };
 

@@ -24,7 +24,7 @@ Sector::Sector(const std::vector<int>& qNumList, int qNum, const MatrixXd& mat)
         if(*qNumListElement == qNum)
             positions.push_back(qNumListElement - firstElement);
     int elmt = 0;
-    for(int j : positions)          // fill sector matrix elements from matrix
+    for(int j : positions)			// fill sector matrix elements from matrix
         for(int i : positions)
             sectorMat(elmt++) = mat(i, j);
 };
@@ -60,11 +60,21 @@ Eigen::VectorXd Sector::nextHighestEvec()
 
 HamSolver::HamSolver(const MatrixXd& mat, const std::vector<int>& qNumList,
                      int targetQNum, VectorXd& bigSeed)
-    : lowestEvec(bigSeed)
+    : storedLowestEvec(bigSeed)
 {
     Sector::fullMatrixSize = mat.rows();
     Sector targetSector(qNumList, targetQNum, mat);
-    lowestEval = targetSector.solveForLowest(lowestEvec);
+    storedLowestEval = targetSector.solveForLowest(storedLowestEvec);
+};
+
+VectorXd HamSolver::lowestEvec() const
+{
+    return storedLowestEvec;
+};
+
+double HamSolver::lowestEval() const
+{
+    return storedLowestEval;
 };
 
 DMSolver::DMSolver(const Eigen::MatrixXd& mat, const std::vector<int>& qNumList,
@@ -72,12 +82,12 @@ DMSolver::DMSolver(const Eigen::MatrixXd& mat, const std::vector<int>& qNumList,
 {
     int matSize = mat.rows();
     Sector::fullMatrixSize = matSize;
-    std::map<int, Sector> sectors;          // key is the quantum number
-    std::map<double, int> indexedEvals;     // eigenvalue, then sector
+    std::map<int, Sector> sectors;			// key is the quantum number
+    std::map<double, int> indexedEvals;		// eigenvalue, then sector
     std::set<int> qNumSet(qNumList.begin(), qNumList.end());
-    for(int qNum : qNumSet)             // make list of indexed eigenvalues
+    for(int qNum : qNumSet)				// make list of indexed eigenvalues
     {
-        sectors.insert(sectors.end(),                   // create sector
+        sectors.insert(sectors.end(),					// create sector
                        std::make_pair(qNum, Sector(qNumList, qNum, mat)));
         sectors[qNum].solveForAll();
         for(int i = 0, end = sectors[qNum].multiplicity; i < end; i++)
@@ -85,13 +95,23 @@ DMSolver::DMSolver(const Eigen::MatrixXd& mat, const std::vector<int>& qNumList,
                                 (sectors[qNum].solver.eigenvalues()(i), qNum));
                                             // add indexed eigenvalues to list
     };
-    highestEvecQNums.reserve(evecsToKeep);
-    highestEvecs = MatrixXd::Zero(matSize, evecsToKeep);
+    storedHighestEvecQNums.reserve(evecsToKeep);
+    storedHighestEvecs = MatrixXd::Zero(matSize, evecsToKeep);
     auto currentIndexedEval = indexedEvals.rbegin();
     for(int j = 0; j < evecsToKeep; j++)
     {
         int qNum = currentIndexedEval++ -> second;
-        highestEvecQNums.push_back(qNum);
-        highestEvecs.col(j) = sectors[qNum].nextHighestEvec();
+        storedHighestEvecQNums.push_back(qNum);
+        storedHighestEvecs.col(j) = sectors[qNum].nextHighestEvec();
     };
+};
+
+MatrixXd DMSolver::highestEvecs() const
+{
+    return storedHighestEvecs;
+};
+
+std::vector<int> DMSolver::highestEvecQNums() const
+{
+    return storedHighestEvecQNums;
 };
