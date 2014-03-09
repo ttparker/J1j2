@@ -9,15 +9,15 @@
 
 class Hamiltonian
 {
-	public:
-		Hamiltonian();
+    public:
+        Hamiltonian();
         void setParams(const std::vector<double>& couplingConstants,
                        int targetQNumIn, int lSysIn);
- 
+    
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  
-	private:
-		std::vector<MatrixDd, Eigen::aligned_allocator<MatrixDd>> h2;
+    
+    private:
+        std::vector<MatrixDd, Eigen::aligned_allocator<MatrixDd>> h2;
                                             // site-basis coupling operators
         std::vector<double> couplingConstants;
         std::vector<int> oneSiteQNums;
@@ -36,7 +36,7 @@ class Hamiltonian
             siteSiteJoin(int ml, int mlE) const;
                                            // joins the two free sites together
     
-	friend class TheBlock;
+    friend class TheBlock;
     friend class EffectiveHamiltonian;
 };
 
