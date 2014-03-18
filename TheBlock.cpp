@@ -22,7 +22,7 @@ TheBlock::TheBlock(const Hamiltonian& hamIn, int mMaxIn)
     ham = hamIn;
     mMax = mMaxIn;
     off0RhoBasisH2.assign(ham.h2.begin(),
-                          ham.h2.begin() + ham.couplingConstants.size());
+                          ham.h2.begin() + indepCouplingOperators);
 };
 
 TheBlock TheBlock::nextBlock(int l, TheBlock& compBlock, bool exactDiag,
@@ -37,7 +37,6 @@ TheBlock TheBlock::nextBlock(int l, TheBlock& compBlock, bool exactDiag,
         hSprime += ham.blockAdjacentSiteJoin(2, off1RhoBasisH2);
     std::vector<MatrixXd> tempOff0RhoBasisH2,
                           tempOff1RhoBasisH2;
-    int indepCouplingOperators = ham.couplingConstants.size();
     tempOff0RhoBasisH2.reserve(indepCouplingOperators);
     tempOff1RhoBasisH2.reserve(indepCouplingOperators);
     int md = m * d;
