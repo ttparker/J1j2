@@ -108,8 +108,8 @@ int main()
                                   = leftBlocks[site].nextBlock(site,
                                                                rightBlocks[site]);
                                         // note: the third argument is not used
-        Sector::setLancTolerance(groundStateErrorTolerance
-                                 * groundStateErrorTolerance / 2);
+        Sector::lancTolerance = groundStateErrorTolerance
+                                * groundStateErrorTolerance / 2;
         bool oddSize = lSys % 2;
         int lSFinal,                        // final length of the system block
             lEFinal;                   // final length of the environment block
@@ -163,7 +163,7 @@ int main()
                       .createHSuperFinal(rightBlocks[lEFinal - 1], skips);
                                                // calculate ground-state energy
         fileout << "Ground state energy density = "
-                << hSuperFinal.gsEnergy() / lSys << std::endl << std::endl;
+                << hSuperFinal.gsEnergy / lSys << std::endl << std::endl;
         if(calcObservables)
         {
             std::cout << "Calculating observables..." << std::endl;
