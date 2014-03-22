@@ -33,8 +33,8 @@ TheBlock TheBlock::nextBlock(int l, TheBlock& compBlock, bool exactDiag,
         = vectorProductSum(qNumList, ham.oneSiteQNums);
     MatrixXd hSprime = kp(hS, Id_d) + ham.blockAdjacentSiteJoin(1, off0RhoBasisH2);
                                                        // expanded system block
-    if(l != 0)
-        hSprime += ham.blockAdjacentSiteJoin(2, off1RhoBasisH2);
+        hSprime += (l == 0 ? -ham.blockAdjacentSiteJoin(1, off0RhoBasisH2) / 2
+                           : ham.blockAdjacentSiteJoin(2, off1RhoBasisH2));
     std::vector<MatrixXd> tempOff0RhoBasisH2,
                           tempOff1RhoBasisH2;
     tempOff0RhoBasisH2.reserve(indepCouplingOperators);
