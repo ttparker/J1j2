@@ -31,7 +31,8 @@ TheBlock TheBlock::nextBlock(int l, TheBlock& compBlock, bool exactDiag,
 {
     std::vector<int> hSprimeQNumList	// add in quantum numbers of new site
         = vectorProductSum(qNumList, ham.oneSiteQNums);
-    MatrixXd hSprime = kp(hS, Id_d) + ham.blockAdjacentSiteJoin(1, off0RhoBasisH2);
+    MatrixXd hSprime = kp(hS, Id_d) + ham.blockAdjacentSiteJoin(1,
+                                                                off0RhoBasisH2);
                                                        // expanded system block
     
 //    if(l != 0)
@@ -52,7 +53,8 @@ TheBlock TheBlock::nextBlock(int l, TheBlock& compBlock, bool exactDiag,
             tempOff0RhoBasisH2.push_back(kp(Id(m), ham.h2[i]));
             tempOff1RhoBasisH2.push_back(kp(off0RhoBasisH2[i], Id_d));
         };
-        return TheBlock(md, hSprime, tempOff0RhoBasisH2, tempOff1RhoBasisH2, hSprimeQNumList);
+        return TheBlock(md, hSprime, tempOff0RhoBasisH2, tempOff1RhoBasisH2,
+                        hSprimeQNumList);
     };
     VectorXd seed;
     int compm = compBlock.m,
