@@ -8,6 +8,7 @@ class EffectiveHamiltonian;
 class TheBlock
 {
     public:
+        int m;                              // number of states stored in block
         Eigen::MatrixXd primeToRhoBasis;            // change-of-basis matrix
         
         TheBlock(int m = 0,
@@ -22,7 +23,7 @@ class TheBlock
                            bool exactDiag = true, bool infiniteStage = true,
                            const TheBlock& beforeCompBlock = TheBlock());
                                                      // performs each DMRG step
-        void randomSeed(const TheBlock& compBlock);           // for iDMRG case
+        void randomSeed(int compm);                           // for iDMRG case
         void reflectPredictedPsi();            // when you reach edge of system
         EffectiveHamiltonian createHSuperFinal(const TheBlock& compBlock,
                                                int skips) const;
@@ -31,21 +32,20 @@ class TheBlock
     private:
         std::vector<int> qNumList;
                 // tracks the conserved quantum number of each row/column of hS
-        Eigen::MatrixXd hS;								// block Hamiltonian
+        Eigen::MatrixXd hS;                                // block Hamiltonian
         static Hamiltonian ham;
         std::vector<Eigen::MatrixXd> off0RhoBasisH2,
                                      off1RhoBasisH2;
             // density-matrix-basis coupling operators - "off" means the offset
             // between this block, in which the operator is represented, and
             // the site on which it acts
-        int m;								// number of states stored in block
         static rmMatrixXd psiGround;
-        static int mMax;				// max size of effective Hamiltonian
+        static int mMax;                   // max size of effective Hamiltonian
         static bool firstfDMRGStep;
                     // slight abuse of nomenclature - true during iDMRG as well
         
         Eigen::MatrixXd changeBasis(const Eigen::MatrixXd& mat) const;
-                // represents operators in the basis of the new system block
+                   // represents operators in the basis of the new system block
     
     friend class EffectiveHamiltonian;
 };
