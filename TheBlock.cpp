@@ -4,9 +4,7 @@
 using namespace Eigen;
 
 Hamiltonian TheBlock::ham;
-rmMatrixXd TheBlock::psiGround;
 int TheBlock::mMax;
-bool TheBlock::firstfDMRGStep;
 
 TheBlock::TheBlock(int m, const MatrixXd& hS,
                    const std::vector<MatrixXd>& off0RhoBasisH2,
@@ -18,14 +16,14 @@ TheBlock::TheBlock(int m, const MatrixXd& hS,
 TheBlock::TheBlock(const Hamiltonian& hamIn, int mMaxIn)
     : m(d), qNumList(ham.oneSiteQNums), hS(MatrixDd::Zero())
 {
-    firstfDMRGStep = true;
     ham = hamIn;
     mMax = mMaxIn;
     off0RhoBasisH2.assign(ham.h2.begin(),
                           ham.h2.begin() + indepCouplingOperators);
 };
 
-TheBlock TheBlock::nextBlock(int l, const TheBlock& compBlock, bool exactDiag,
+TheBlock TheBlock::nextBlock(rmMatrixXd& psiGround, int l,
+                             const TheBlock& compBlock, bool exactDiag,
                              bool infiniteStage,
                              const TheBlock& beforeCompBlock)
 {
@@ -58,13 +56,6 @@ TheBlock TheBlock::nextBlock(int l, const TheBlock& compBlock, bool exactDiag,
     };
     int compm = compBlock.m,
         compmd = compm * d;
-    if(infiniteStage)
-        randomSeed(m);
-    else if(firstfDMRGStep)
-    {
-        randomSeed(compm);
-        firstfDMRGStep = false;
-    };
     HamSolver hSuperSolver = (infiniteStage ?       // find superblock eigenstates
                               HamSolver(MatrixXd(kp(hSprime, Id(md))
                                                  + ham.lBlockrSiteJoin(off0RhoBasisH2, m)
@@ -119,20 +110,8 @@ TheBlock TheBlock::nextBlock(int l, const TheBlock& compBlock, bool exactDiag,
                                 // save expanded-block operators in new basis
 };
 
-void TheBlock::randomSeed(int compm)
-{
-    psiGround = VectorXd::Random(m * d * compm * d);
-    psiGround /= psiGround.norm();
-};
-
-void TheBlock::reflectPredictedPsi()
-{
-    psiGround.resize(mMax * d, m * d);
-    psiGround.transposeInPlace();
-    psiGround.resize(mMax * d * m * d, 1);
-};
-
 EffectiveHamiltonian TheBlock::createHSuperFinal(const TheBlock& compBlock,
+                                                 const rmMatrixXd& psiGround,
                                                  int skips) const
 {
     int compm = compBlock.m;
@@ -147,7 +126,7 @@ EffectiveHamiltonian TheBlock::createHSuperFinal(const TheBlock& compBlock,
                                          + kp(Id(m * d), ham.blockAdjacentSiteJoin(1, compBlock.off0RhoBasisH2)
                                                          + ham.blockAdjacentSiteJoin(2, compBlock.off1RhoBasisH2)
                                                          + kp(compBlock.hS, Id_d))),
-                                m, compm, skips);
+                                psiGround, m, compm, skips);
 };
 
 MatrixXd TheBlock::changeBasis(const MatrixXd& mat) const
