@@ -10,6 +10,8 @@
 class Hamiltonian
 {
     public:
+        int lSys;                                      // current system length
+        
         Hamiltonian();
         void setParams(const std::vector<double>& couplingConstants,
                        int targetQNumIn, int lSysIn);
@@ -21,8 +23,7 @@ class Hamiltonian
         std::vector<double> couplingConstants;
         std::vector<MatrixDd, Eigen::aligned_allocator<MatrixDd>> h2;
                                                // site-basis coupling operators
-        int targetQNum,              // targeted average magnetization per site
-            lSys;                                      // current system length
+        int targetQNum;              // targeted average magnetization per site
         
         Eigen::MatrixXd
             blockAdjacentSiteJoin(int j,
