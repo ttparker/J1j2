@@ -25,11 +25,12 @@ TheBlock TheBlock::nextBlock(const stepData& data, rmMatrixX_t& psiGround)
                         + data.ham.blockAdjacentSiteJoin(1, off0RhoBasisH2);
                                                        // expanded system block
     
-//    if(l != 0)
-//        hSprime += data.ham.blockAdjacentSiteJoin(2, off1RhoBasisH2);
+    if(l != 0)
+        hSprime += data.ham.blockAdjacentSiteJoin(2, off1RhoBasisH2);
     
-    hSprime += (l == 0 ? -data.ham.blockAdjacentSiteJoin(1, off0RhoBasisH2) / 2
-                       : data.ham.blockAdjacentSiteJoin(2, off1RhoBasisH2));
+//    hSprime += (l == 0 ? -data.ham.blockAdjacentSiteJoin(1, off0RhoBasisH2) / 2
+//                       : data.ham.blockAdjacentSiteJoin(2, off1RhoBasisH2));
+
     std::vector<MatrixX_t> tempOff0RhoBasisH2,
                            tempOff1RhoBasisH2;
     tempOff0RhoBasisH2.reserve(indepCouplingOperators);
