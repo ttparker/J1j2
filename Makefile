@@ -12,9 +12,9 @@ deep = $(git) *.o
 $(PROG): $(OBJS)
 	$(CXX) $(CXXFLAGS) $(LIBS) -o $(PROG) $(OBJS)
 
-FinalSuperblock.o: $(COMMONHS2)
-
 ESolver.o: $(COMMONHS1) Hamiltonian.h TheBlock.h ESolver.h
+
+FinalSuperblock.o: $(COMMONHS2)
 
 FreeFunctions.o: $(COMMONHS1) Hamiltonian.h TheBlock.h FinalSuperblock.h GlobalPrecisionParameters.h
 
@@ -44,3 +44,6 @@ upload:
 
 download:
 	scp knot.cnsi.ucsb.edu:~/$(SOURCE)/Output/* Cluster
+
+collect:
+	$(CXX) $(CXXFLAGS) -o Cluster/CollectData Cluster/CollectData.cpp
