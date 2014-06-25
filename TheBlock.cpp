@@ -136,5 +136,5 @@ FinalSuperblock TheBlock::createHSuperFinal(const stepData& data,
 
 MatrixX_t TheBlock::changeBasis(const MatrixX_t& mat) const
 {
-	return primeToRhoBasis.adjoint() * mat * primeToRhoBasis;
+    return primeToRhoBasis.adjoint() * mat * primeToRhoBasis;
 };
