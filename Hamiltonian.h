@@ -30,11 +30,11 @@ class Hamiltonian
                                         const,
                                          // j gives the j-1th coupling constant
                   lBlockrSiteJoin(const std::vector<MatrixX_t>& off0RhoBasisH2,
-                                  int mlE) const,
-                  lSiterBlockJoin(int ml,
+                                  int compm) const,
+                  lSiterBlockJoin(int m,
                                   const std::vector<MatrixX_t>& off0RhoBasisH2)
                                   const,
-                  siteSiteJoin(int ml, int mlE) const;
+                  siteSiteJoin(int m, int compm) const;
                                            // joins the two free sites together
     
     friend class TheBlock;
