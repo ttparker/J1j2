@@ -24,13 +24,10 @@ TheBlock TheBlock::nextBlock(const stepData& data, rmMatrixX_t& psiGround)
     MatrixX_t hSprime = kp(hS, Id_d)
                         + data.ham.blockAdjacentSiteJoin(1, off0RhoBasisH2);
                                                        // expanded system block
-    
     if(l != 0)
         hSprime += data.ham.blockAdjacentSiteJoin(2, off1RhoBasisH2);
-    
 //    hSprime += (l == 0 ? -data.ham.blockAdjacentSiteJoin(1, off0RhoBasisH2) / 2
 //                       : data.ham.blockAdjacentSiteJoin(2, off1RhoBasisH2));
-
     std::vector<MatrixX_t> tempOff0RhoBasisH2,
                            tempOff1RhoBasisH2;
     tempOff0RhoBasisH2.reserve(indepCouplingOperators);
@@ -108,11 +105,6 @@ TheBlock TheBlock::nextBlock(const stepData& data, rmMatrixX_t& psiGround)
                                   // save expanded-block operators in new basis
 };
 
-obsMatrixX_t TheBlock::obsChangeBasis(const obsMatrixX_t& mat) const
-{
-    return primeToRhoBasis.adjoint() * mat * primeToRhoBasis;
-};
-
 FinalSuperblock TheBlock::createHSuperFinal(const stepData& data,
                                             const rmMatrixX_t& psiGround,
                                             int skips) const
@@ -132,6 +124,11 @@ FinalSuperblock TheBlock::createHSuperFinal(const stepData& data,
                                                      + kp(data.compBlock -> hS, Id_d))),
                            qNumList, data.compBlock -> qNumList, data,
                            psiGround, m, compm, skips);
+};
+
+obsMatrixX_t TheBlock::obsChangeBasis(const obsMatrixX_t& mat) const
+{
+    return primeToRhoBasis.adjoint() * mat * primeToRhoBasis;
 };
 
 MatrixX_t TheBlock::changeBasis(const MatrixX_t& mat) const
