@@ -115,10 +115,9 @@ FinalSuperblock TheBlock::createHSuperFinal(const stepData& data,
                                             int skips) const
 {
     MatrixX_t hSprime = kp(hS, Id_d)
-                        + data.ham.blockAdjacentSiteJoin(1, off0RhoBasisH2);
+                        + data.ham.blockAdjacentSiteJoin(1, off0RhoBasisH2)
+                        + data.ham.blockAdjacentSiteJoin(2, off1RhoBasisH2);
                                                        // expanded system block
-    if(l != 0)
-        hSprime += data.ham.blockAdjacentSiteJoin(2, off1RhoBasisH2);
     int compm = data.compBlock -> m;
     MatrixX_t hEprime = kp(data.compBlock -> hS, Id_d)
                         + data.ham.blockAdjacentSiteJoin(1, data.compBlock
