@@ -16,7 +16,7 @@ ESolver.o: $(COMMONHS1) ESolver.h
 
 FinalSuperblock.o: $(COMMONHS2)
 
-FreeFunctions.o: $(COMMONHS1) Hamiltonian.h TheBlock.h FinalSuperblock.h GlobalPrecisionParameters.h
+FreeFunctions.o: $(COMMONHS1) Hamiltonian.h TheBlock.h FinalSuperblock.h ESolver.h GlobalPrecisionParameters.h
 
 Lanczos.o: $(COMMONHS1) ESolver.h GlobalPrecisionParameters.h
 

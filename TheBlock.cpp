@@ -111,13 +111,15 @@ TheBlock TheBlock::nextBlock(const stepData& data, rmMatrixX_t& psiGround)
 };
 
 FinalSuperblock TheBlock::createHSuperFinal(const stepData& data,
-                                            const rmMatrixX_t& psiGround,
-                                            int skips) const
+                                            rmMatrixX_t& psiGround, int skips)
+                                            const
 {
     MatrixX_t hSprime = kp(hS, Id_d)
                         + data.ham.blockAdjacentSiteJoin(1, off0RhoBasisH2)
                         + data.ham.blockAdjacentSiteJoin(2, off1RhoBasisH2);
                                                        // expanded system block
+    std::vector<int> hSprimeQNumList = vectorProductSum(qNumList,
+                                                        data.ham.oneSiteQNums);
     int compm = data.compBlock -> m;
     MatrixX_t hEprime = kp(data.compBlock -> hS, Id_d)
                         + data.ham.blockAdjacentSiteJoin(1, data.compBlock
@@ -125,14 +127,19 @@ FinalSuperblock TheBlock::createHSuperFinal(const stepData& data,
                         + data.ham.blockAdjacentSiteJoin(2, data.compBlock
                                                             -> off1RhoBasisH2);
                                                   // expanded environment block
-    return FinalSuperblock(kp(hSprime, Id(compm * d))
-                           + data.ham.lBlockrSiteJoin(off0RhoBasisH2, compm)
-                           + data.ham.siteSiteJoin(m, compm)
-                           + data.ham.lSiterBlockJoin(m, data.compBlock
-                                                         -> off0RhoBasisH2)
-                           + kp(Id(m * d), hEprime),
-                           qNumList, data.compBlock -> qNumList, data,
-                           psiGround, m, compm, skips);
+    std::vector<int> hEprimeQNumList = vectorProductSum(data.compBlock
+                                                        -> qNumList,
+                                                        data.ham.oneSiteQNums);
+    MatrixX_t hSuper = kp(hSprime, Id(compm * d))
+                       + data.ham.lBlockrSiteJoin(off0RhoBasisH2, compm)
+                       + data.ham.siteSiteJoin(m, compm)
+                       + data.ham.lSiterBlockJoin(m, data.compBlock
+                                                     -> off0RhoBasisH2)
+                       + kp(Id(m * d), hEprime);
+    HamSolver hSuperSolver(hSuper,
+                           vectorProductSum(hSprimeQNumList, hEprimeQNumList),
+                           data.ham.targetQNum, psiGround, data.lancTolerance);
+    return FinalSuperblock(hSuperSolver, data.ham.lSys, m, compm, skips);
 };
 
 obsMatrixX_t TheBlock::obsChangeBasis(const obsMatrixX_t& mat) const
