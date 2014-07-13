@@ -1,5 +1,4 @@
 #include "FreeFunctions.h"
-#include "ESolver.h"
 
 using namespace Eigen;
 
@@ -25,37 +24,12 @@ TheBlock TheBlock::nextBlock(const stepData& data, rmMatrixX_t& psiGround)
         return TheBlock(md, hSprimeQNumList, hSprime,
                         createNewRhoBasisH2s(data.ham.siteBasisH2, true), l + 1);
       // if near edge of system, no truncation necessary so skip DMRG algorithm
-    int compm = data.compBlock -> m,
-        compmd = compm * d;
-    MatrixX_t hEprime;                            // expanded environment block
-    std::vector<int> hEprimeQNumList;
-    int scaledTargetQNum;
-    if(data.infiniteStage)
-    {
-        hEprime = hSprime;
-        hEprimeQNumList = hSprimeQNumList;
-        scaledTargetQNum = data.ham.targetQNum * (l + 2) / data.ham.lSys * 2;
-                                               // int automatically rounds down
-                         // during iDMRG stage, targets correct quantum number
-                         // per unit site by scaling to fit current system size
-                         // - note: this will change if d != 2
-    }
-    else
-    {
-        hEprime = createHprime(data.compBlock, data.ham, hEprimeQNumList);
-        scaledTargetQNum = data.ham.targetQNum;
-    };
-    HamSolver hSuperSolver(kp(hSprime, Id(compmd))
-                           + data.ham.lBlockrSiteJoin(off0RhoBasisH2, compm)
-                           + data.ham.siteSiteJoin(m, compm)
-                           + data.ham.lSiterBlockJoin(m, data.compBlock
-                                                         -> off0RhoBasisH2)
-                           + kp(Id(md), hEprime),
-                           vectorProductSum(hSprimeQNumList, hEprimeQNumList),
-                           scaledTargetQNum, psiGround, data.lancTolerance);
-                                                 // find superblock eigenstates
+    HamSolver hSuperSolver = createHSuperSolver(data, hSprime, hSprimeQNumList,
+                                                psiGround);
+                                           // calculate superblock ground state
     psiGround = hSuperSolver.lowestEvec;                        // ground state
-    psiGround.resize(md, compmd);
+    int compm = data.compBlock -> m;
+    psiGround.resize(md, compm * d);
     DMSolver rhoSolver(psiGround * psiGround.adjoint(), hSprimeQNumList,
                        data.mMax);           // find density matrix eigenstates
     primeToRhoBasis = rhoSolver.highestEvecs; // construct change-of-basis matrix
@@ -67,7 +41,7 @@ TheBlock TheBlock::nextBlock(const stepData& data, rmMatrixX_t& psiGround)
             rmMatrixX_t ePrime = psiGround.row(sPrimeIndex);
             ePrime.resize(compm, d);
             ePrime.transposeInPlace();
-            ePrime.resize(1, compmd);
+            ePrime.resize(1, compm * d);
             psiGround.row(sPrimeIndex) = ePrime;
         };
         psiGround = primeToRhoBasis.adjoint() * psiGround; 
@@ -106,7 +80,7 @@ matPair TheBlock::createNewRhoBasisH2s(const vecMatD_t& siteBasisH2,
     newOff1RhoBasisH2.reserve(indepCouplingOperators);
     for(int i = 0; i < indepCouplingOperators; i++)
     {
-        newOff0RhoBasisH2.push_back(exactDiag?
+        newOff0RhoBasisH2.push_back(exactDiag ?
                                     kp(Id(m), siteBasisH2[i]) :
                                     changeBasis(kp(Id(m), siteBasisH2[i])));
         newOff1RhoBasisH2.push_back(exactDiag ?
@@ -116,6 +90,40 @@ matPair TheBlock::createNewRhoBasisH2s(const vecMatD_t& siteBasisH2,
     return std::make_pair(newOff0RhoBasisH2, newOff1RhoBasisH2);
 };
 
+HamSolver TheBlock::createHSuperSolver(const stepData data,
+                                       const MatrixX_t& hSprime,
+                                       const std::vector<int>& hSprimeQNumList,
+                                       rmMatrixX_t& psiGround) const
+{
+    MatrixX_t hEprime;                            // expanded environment block
+    std::vector<int> hEprimeQNumList;
+    int scaledTargetQNum;
+    if(data.infiniteStage)
+    {
+        hEprime = hSprime;
+        hEprimeQNumList = hSprimeQNumList;
+        scaledTargetQNum = data.ham.targetQNum * (l + 2) / data.ham.lSys * 2;
+                                               // int automatically rounds down
+                         // during iDMRG stage, targets correct quantum number
+                         // per unit site by scaling to fit current system size
+                         // - note: this will change if d != 2
+    }
+    else
+    {
+        hEprime = createHprime(data.compBlock, data.ham, hEprimeQNumList);
+        scaledTargetQNum = data.ham.targetQNum;
+    };
+    int compm = data.compBlock -> m;
+    MatrixX_t hSuper = kp(hSprime, Id(compm * d))
+                       + data.ham.lBlockrSiteJoin(off0RhoBasisH2, compm)
+                       + data.ham.siteSiteJoin(m, compm)
+                       + data.ham.lSiterBlockJoin(m, data.compBlock
+                                                     -> off0RhoBasisH2)
+                       + kp(Id(m * d), hEprime);                  // superblock
+    return HamSolver(hSuper, vectorProductSum(hSprimeQNumList, hEprimeQNumList),
+                     scaledTargetQNum, psiGround, data.lancTolerance);
+};
+
 FinalSuperblock TheBlock::createHSuperFinal(const stepData& data,
                                             rmMatrixX_t& psiGround, int skips)
                                             const
@@ -123,20 +131,11 @@ FinalSuperblock TheBlock::createHSuperFinal(const stepData& data,
     std::vector<int> hSprimeQNumList;
     MatrixX_t hSprime = createHprime(this, data.ham, hSprimeQNumList);
                                                        // expanded system block
-    int compm = data.compBlock -> m;
-    std::vector<int> hEprimeQNumList;
-    MatrixX_t hEprime = createHprime(data.compBlock, data.ham, hEprimeQNumList);
-                                                  // expanded environment block
-    MatrixX_t hSuper = kp(hSprime, Id(compm * d))
-                       + data.ham.lBlockrSiteJoin(off0RhoBasisH2, compm)
-                       + data.ham.siteSiteJoin(m, compm)
-                       + data.ham.lSiterBlockJoin(m, data.compBlock
-                                                     -> off0RhoBasisH2)
-                       + kp(Id(m * d), hEprime);
-    HamSolver hSuperSolver(hSuper,
-                           vectorProductSum(hSprimeQNumList, hEprimeQNumList),
-                           data.ham.targetQNum, psiGround, data.lancTolerance);
-    return FinalSuperblock(hSuperSolver, data.ham.lSys, m, compm, skips);
+    HamSolver hSuperSolver = createHSuperSolver(data, hSprime, hSprimeQNumList,
+                                                psiGround);
+                                           // calculate superblock ground state
+    return FinalSuperblock(hSuperSolver, data.ham.lSys, m, data.compBlock -> m,
+                           skips);
 };
 
 obsMatrixX_t TheBlock::obsChangeBasis(const obsMatrixX_t& mat) const

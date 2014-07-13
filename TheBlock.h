@@ -2,11 +2,12 @@
 #define THEBLOCK_H
 
 #include "Hamiltonian.h"
+#include "ESolver.h"
+
+typedef std::pair<std::vector<MatrixX_t>, std::vector<MatrixX_t>> matPair;
 
 class FinalSuperblock;
 class TheBlock;
-
-typedef std::pair<std::vector<MatrixX_t>, std::vector<MatrixX_t>> matPair;
 
 struct stepData
 {
@@ -55,6 +56,10 @@ class TheBlock
                                std::vector<int>& hPrimeQNumList) const;
         matPair createNewRhoBasisH2s(const vecMatD_t& siteBasisH2,
                                      bool exactDiag) const;
+        HamSolver createHSuperSolver(const stepData data,
+                                     const MatrixX_t& hSprime,
+                                     const std::vector<int>& hSprimeQNumList,
+                                     rmMatrixX_t& psiGround) const;
         MatrixX_t changeBasis(const MatrixX_t& mat) const;
                    // represents operators in the basis of the new system block
 };
