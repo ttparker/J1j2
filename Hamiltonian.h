@@ -7,6 +7,8 @@
 #define Id(size) MatrixXd::Identity(size, size)
 #define Id_d Matrix<double, d, d>::Identity()       // one-site identity matrix
 
+typedef std::vector<MatrixD_t, Eigen::aligned_allocator<MatrixD_t>> vecMatD_t;
+
 class Hamiltonian
 {
     public:
@@ -22,8 +24,7 @@ class Hamiltonian
     
     private:
         std::vector<double> couplingConstants;
-        std::vector<MatrixD_t, Eigen::aligned_allocator<MatrixD_t>> siteBasisH2;
-                                               // site-basis coupling operators
+        vecMatD_t siteBasisH2;                 // site-basis coupling operators
         
         MatrixX_t blockAdjacentSiteJoin(int j,
                                         const std::vector<MatrixX_t>& rhoBasisH2)
