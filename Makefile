@@ -12,7 +12,7 @@ deep = $(git) *.o
 $(PROG): $(OBJS)
 	$(CXX) $(CXXFLAGS) $(LIBS) -o $(PROG) $(OBJS)
 
-ESolver.o: $(COMMONHS1) ESolver.h
+ESolver.o: $(COMMONHS1) ESolver.h GlobalPrecisionParameters.h
 
 FinalSuperblock.o: $(COMMONHS2)
 
